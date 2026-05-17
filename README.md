@@ -136,3 +136,31 @@ docker build -t gcr.io/YOUR_PROJECT_ID/fastapi-healthcheck:latest .
 docker push gcr.io/YOUR_PROJECT_ID/fastapi-healthcheck:latest
 kubectl rollout restart deployment/fastapi-healthcheck
 ```
+
+## Celery worker
+
+This project includes a Celery worker and a sample task.
+
+- Broker/backend: Redis (docker-compose service `redis`).
+- Task: `tasks.add(x, y)` — returns `x + y`.
+
+Run with Docker Compose (starts the FastAPI app, Redis, and the Celery worker):
+```bash
+docker compose up --build
+```
+
+Trigger a task (example):
+```bash
+curl -X POST http://localhost:8000/tasks/add -H "Content-Type: application/json" -d '{"x":3,"y":4}'
+# -> {"task_id":"<id>"}
+
+curl http://localhost:8000/tasks/<id>
+# -> {"task_id":"<id>", "status":"SUCCESS", "result":7}
+```
+
+If you prefer running the worker separately:
+```bash
+docker compose up -d redis
+docker build -t fastapi-healthcheck .
+docker run --rm --network host fastapi-healthcheck celery -A celery_app.celery worker --loglevel=info
+```
