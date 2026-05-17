@@ -19,7 +19,7 @@ spec:
         image: asia-south1-docker.pkg.dev/project-6206f1cc-135e-44bd-acf/fastapi-images/fastapi-healthcheck:latest
         imagePullPolicy: Always
         command: ["celery"]
-        args: ["-A", "celery_app.celery", "flower", "--port=5555", "--address=0.0.0.0", "--broker=redis://redis:6379/0"]
+        args: ["-A", "celery_app.celery", "--broker=redis://redis:6379/0", "flower", "--port=5555", "--address=0.0.0.0"]
         ports:
         - containerPort: 5555
           name: http
