@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-test:
+    name: Lint and test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir -r requirements.txt
+
+      - name: Validate Python syntax
+        run: python -m py_compile main.py
+
+      - name: Start app and run smoke test
+        run: |
+          python -m uvicorn main:app --host 127.0.0.1 --port 8000 &
+          sleep 5
+          curl --fail http://127.0.0.1:8000/health
+
+  build-docker-image:
+    name: Build Docker image
+    needs: lint-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build Docker image
+        run: docker build -t fastapi-healthcheck:ci .
+
+  push-to-artifact-registry:
+    name: Push Docker image to Artifact Registry
+    needs: build-docker-image
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
+    runs-on: ubuntu-latest
+    env:
+      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      GCP_AR_LOCATION: ${{ secrets.GCP_AR_LOCATION }}
+      GCP_AR_REPOSITORY: ${{ secrets.GCP_AR_REPOSITORY }}
+      IMAGE_TAG: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'latest' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+
+      - name: Configure Docker credential helper
+        run: gcloud auth configure-docker ${GCP_AR_LOCATION}-docker.pkg.dev --quiet
+
+      - name: Build and push Docker image
+        run: |
+          IMAGE=${GCP_AR_LOCATION}-docker.pkg.dev/${GCP_PROJECT_ID}/${GCP_AR_REPOSITORY}/fastapi-healthcheck:${IMAGE_TAG}
+          docker build -t "$IMAGE" .
+          docker push "$IMAGE"

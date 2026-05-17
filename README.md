@@ -40,6 +40,46 @@ Or with Docker Compose:
 docker compose up --build
 ```
 
+## GitHub Actions CI
+
+This repository includes a GitHub Actions workflow at `.github/workflows/ci.yml` that runs on push and pull request to `main`.
+
+The workflow performs:
+- Python dependency install
+- syntax validation with `python -m py_compile`
+- a smoke test against `GET /health`
+- Docker image build verification
+- push the Docker image to Google Artifact Registry (when secrets are configured)
+
+### Release flow
+
+1. Make local changes and commit them.
+2. Push to the remote `main` branch:
+   ```bash
+   git push origin main
+   ```
+3. Create a version tag locally:
+   ```bash
+   git tag v1.0.0
+   ```
+4. Push the tag:
+   ```bash
+   git push origin v1.0.0
+   ```
+5. GitHub Actions will build and push a tagged image to Artifact Registry.
+6. Update `k8s/deployment.yaml` to point to the new image tag, then apply it to your cluster.
+
+For example:
+```bash
+kubectl apply -f k8s/deployment.yaml
+```
+
+To enable Artifact Registry deployment, add these repository secrets in GitHub:
+- `GCP_PROJECT_ID`
+- `GCP_SA_KEY` (service account JSON)
+- `GCP_AR_LOCATION` (for example `us-central1`)
+- `GCP_AR_REPOSITORY` (the Artifact Registry repo name)
+
 ## Deploy to GKE
 
 1. Configure your GCP project and authenticate:
