@@ -12,5 +12,5 @@ celery = Celery(
 
 celery.conf.update(task_track_started=True)
 
-# Autodiscover tasks from tasks.py and other modules
-celery.autodiscover_tasks(['tasks'])
+# Import tasks to ensure they are registered
+import tasks  # noqa: F401
