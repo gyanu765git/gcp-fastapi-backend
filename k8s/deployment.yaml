@@ -15,30 +15,27 @@ spec:
         app: fastapi-healthcheck
     spec:
       containers:
-        - name: fastapi-healthcheck
-          image: asia-south1-docker.pkg.dev/project-6206f1cc-135e-44bd-acf/fastapi-images/fastapi-healthcheck:v1.0.04
-          imagePullPolicy: Always
-          ports:
-            - containerPort: 8000
-
-          readinessProbe:
-            httpGet:
-              path: /health
-              port: 8000
-            initialDelaySeconds: 5
-            periodSeconds: 10
-
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: 8000
-            initialDelaySeconds: 15
-            periodSeconds: 20
-
-          resources:
-            requests:
-              cpu: "100m"
-              memory: "128Mi"
-            limits:
-              cpu: "500m"
-              memory: "512Mi"
+      - name: fastapi-healthcheck
+        image: asia-south1-docker.pkg.dev/project-6206f1cc-135e-44bd-acf/fastapi-images/fastapi-healthcheck:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        resources:
+          requests:
+            cpu: "10m"
+            memory: "64Mi"
+          limits:
+            cpu: "100m"
+            memory: "256Mi"
