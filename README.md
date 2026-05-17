@@ -144,9 +144,14 @@ This project includes a Celery worker and a sample task.
 - Broker/backend: Redis (docker-compose service `redis`).
 - Task: `tasks.add(x, y)` — returns `x + y`.
 
-Run with Docker Compose (starts the FastAPI app, Redis, and the Celery worker):
+Run with Docker Compose (starts the FastAPI app, Redis, the Celery worker, and Flower dashboard):
 ```bash
 docker compose up --build
+```
+
+Visit the Flower dashboard in your browser:
+```bash
+http://localhost:5555
 ```
 
 Trigger a task (example):
@@ -163,4 +168,9 @@ If you prefer running the worker separately:
 docker compose up -d redis
 docker build -t fastapi-healthcheck .
 docker run --rm --network host fastapi-healthcheck celery -A celery_app.celery worker --loglevel=info
+```
+
+For Flower separately:
+```bash
+docker run --rm --network host -v "$PWD":/app -w /app python:3.12-slim bash -c "pip install -r requirements.txt && celery -A celery_app.celery flower --port=5555 --address=0.0.0.0"
 ```
