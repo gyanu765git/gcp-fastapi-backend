@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: fastapi-healthcheck
-          image: asia-south1-docker.pkg.dev/project-6206f1cc-135e-44bd-acf/fastapi-images/gcp-fastapi-k-web:v2
+          image: asia-south1-docker.pkg.dev/project-6206f1cc-135e-44bd-acf/fastapi-images/fastapi-healthcheck:v1.0.04
           imagePullPolicy: Always
           ports:
             - containerPort: 8000
