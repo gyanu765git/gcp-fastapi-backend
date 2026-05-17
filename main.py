@@ -11,3 +11,8 @@ app = FastAPI(
 def health_check() -> dict:
     """Return a simple health status response."""
     return {"status": "healthy, it is running perfectly fine!"}
+
+@app.get("/hello-world", summary="Hello World", tags=["General"])
+def hello_world() -> dict:
+    """Return a simple hello world response."""
+    return {"message": "Hello, World!"}
