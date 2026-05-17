@@ -18,6 +18,9 @@ spec:
       - name: flower
         image: asia-south1-docker.pkg.dev/project-6206f1cc-135e-44bd-acf/fastapi-images/fastapi-healthcheck:latest
         imagePullPolicy: Always
+        env:
+        - name: FLOWER_PORT
+          value: "5555"
         command: ["celery"]
         args: ["-A", "celery_app.celery", "--broker=redis://redis:6379/0", "flower", "--port=5555", "--address=0.0.0.0"]
         ports:
