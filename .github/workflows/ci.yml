@@ -65,9 +65,9 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
-      GCP_AR_LOCATION: ${{ vars.GCP_AR_LOCATION }}
-      GCP_AR_REPOSITORY: ${{ vars.GCP_AR_REPOSITORY }}
+      GCP_PROJECT_ID: project-6206f1cc-135e-44bd-acf
+      GCP_AR_LOCATION: asia-south1
+      GCP_AR_REPOSITORY: fastapi-images
       IMAGE_TAG: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'latest' }}
 
     steps:
@@ -83,7 +83,7 @@ jobs:
       - name: Set up gcloud
         uses: google-github-actions/setup-gcloud@v2
         with:
-          project_id: ${{ vars.GCP_PROJECT_ID }}
+          project_id: ${{ env.GCP_PROJECT_ID }}
 
       - name: Configure Docker authentication
         run: |
