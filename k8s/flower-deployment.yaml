@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flower
+  labels:
+    app: flower
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flower
+  template:
+    metadata:
+      labels:
+        app: flower
+    spec:
+      containers:
+      - name: flower
+        image: asia-south1-docker.pkg.dev/project-6206f1cc-135e-44bd-acf/fastapi-images/fastapi-healthcheck:latest
+        imagePullPolicy: Always
+        command: ["celery"]
+        args: ["-A", "celery_app.celery", "flower", "--port=5555", "--address=0.0.0.0", "--broker=redis://redis:6379/0"]
+        ports:
+        - containerPort: 5555
+          name: http
+        resources:
+          requests:
+            cpu: "10m"
+            memory: "64Mi"
+          limits:
+            cpu: "50m"
+            memory: "128Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flower
+  labels:
+    app: flower
+spec:
+  type: LoadBalancer
+  selector:
+    app: flower
+  ports:
+  - protocol: TCP
+    port: 5555
+    targetPort: 5555

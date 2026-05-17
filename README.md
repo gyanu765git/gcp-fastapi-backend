@@ -154,6 +154,11 @@ Visit the Flower dashboard in your browser:
 http://localhost:5555
 ```
 
+If deployed to GKE, the Flower dashboard is available via the Flower LoadBalancer service external IP:
+```bash
+kubectl get svc flower
+```
+
 Trigger a task (example):
 ```bash
 curl -X POST http://localhost:8000/tasks/add -H "Content-Type: application/json" -d '{"x":3,"y":4}'
